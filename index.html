@@ -357,7 +357,8 @@ async function handleLogin(e) {
   if (error) { showMsg(translateError(error.message), 'error'); setLoading('btn-login', false); return; }
 
   // Checar status do perfil
-  const { data: profile } = await sb.from('profiles').select('status, role').eq('id', data.user.id).single();
+  const { data: profile, error: profileError } = await sb.from('profiles').select('status, role').eq('id', data.user.id).single();
+console.log('PERFIL:', profile, 'ERRO:', profileError);
   if (!profile || profile.status === 'pending') {
     await sb.auth.signOut();
     showMsg('Sua conta ainda está aguardando aprovação. Entraremos em contato em breve.', 'error');
