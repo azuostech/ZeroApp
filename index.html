@@ -417,6 +417,9 @@ function translateError(msg) {
   if (msg.includes('Email not confirmed')) return 'Confirme seu e-mail antes de entrar.';
   if (msg.includes('already registered')) return 'Este e-mail já está cadastrado.';
   if (msg.includes('Password should')) return 'A senha deve ter pelo menos 6 caracteres.';
+  if (msg.includes('Gateway Timeout') || msg.includes('504')) {
+    return 'Cadastro indisponível no momento (timeout no servidor). Verifique SMTP/Email no Supabase e tente novamente.';
+  }
   return msg;
 }
 </script>
