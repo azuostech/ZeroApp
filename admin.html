@@ -20,6 +20,39 @@
   --text: #f0f0f0;
   --muted: #555;
   --dim: #888;
+  --line-soft: rgba(255,255,255,0.03);
+  --hover-soft: rgba(255,255,255,0.015);
+  --btn-hover-border: #444;
+  --overlay: rgba(0,0,0,0.75);
+  --theme-pill: #171717;
+  --theme-pill-border: #2a2a2a;
+  --theme-pill-text: #b6cdbf;
+  --theme-pill-active-bg: #00C853;
+  --theme-pill-active-text: #05110a;
+}
+:root[data-theme="light"] {
+  --bg: #edf4ef;
+  --bg2: #ffffff;
+  --bg3: #e8f0ea;
+  --bg4: #dfe8e1;
+  --border: #cad8cf;
+  --green: #00a54a;
+  --green-dim: rgba(0,165,74,0.12);
+  --gold: #b79100;
+  --red: #d74141;
+  --blue: #2d70e2;
+  --text: #16261d;
+  --muted: #5c7467;
+  --dim: #3d5348;
+  --line-soft: rgba(22,38,29,0.08);
+  --hover-soft: rgba(22,38,29,0.06);
+  --btn-hover-border: #8ba496;
+  --overlay: rgba(17,35,24,0.45);
+  --theme-pill: #f6faf7;
+  --theme-pill-border: #c4d5ca;
+  --theme-pill-text: #385146;
+  --theme-pill-active-bg: #00a54a;
+  --theme-pill-active-text: #ffffff;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-serif; min-height: 100vh; }
@@ -34,6 +67,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-seri
   position: sticky; top: 0; z-index: 100;
 }
 .header-left { display: flex; align-items: center; gap: 16px; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.theme-switch { display: inline-flex; background: var(--theme-pill); border: 1px solid var(--theme-pill-border); border-radius: 999px; padding: 3px; gap: 3px; }
+.theme-btn { border: none; background: transparent; color: var(--theme-pill-text); border-radius: 999px; font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 600; padding: 5px 10px; cursor: pointer; transition: all 0.15s; }
+.theme-btn.active { background: var(--theme-pill-active-bg); color: var(--theme-pill-active-text); }
 .admin-badge {
   background: rgba(255,215,0,0.1);
   border: 1px solid rgba(255,215,0,0.3);
@@ -50,6 +87,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-seri
   transition: all 0.15s;
 }
 .btn-logout:hover { border-color: var(--red); color: var(--red); }
+@media (max-width: 760px) {
+  .header { padding: 0 12px; }
+  .header-title { font-size: 14px; }
+  .theme-btn { padding: 4px 8px; }
+  .btn-logout { padding: 6px 10px; font-size: 11px; }
+}
 
 /* LAYOUT */
 .layout { display: flex; min-height: calc(100vh - 60px); }
@@ -109,9 +152,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-seri
 table { width: 100%; border-collapse: collapse; }
 thead tr { background: var(--bg3); }
 th { padding: 12px 16px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
-td { padding: 13px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+td { padding: 13px 16px; font-size: 13px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(255,255,255,0.015); }
+tr:hover td { background: var(--hover-soft); }
 
 .user-name { font-weight: 600; color: var(--text); }
 .user-email { font-size: 11px; color: var(--dim); margin-top: 2px; }
@@ -142,7 +185,7 @@ tr:hover td { background: rgba(255,255,255,0.015); }
 .btn-enable { background: rgba(100,136,255,0.08); color: var(--blue); border: 1px solid rgba(100,136,255,0.2); }
 .btn-enable:hover { background: var(--blue); color: #fff; }
 .btn-view { background: rgba(255,255,255,0.05); color: var(--dim); border: 1px solid var(--border); }
-.btn-view:hover { color: var(--text); border-color: #444; }
+.btn-view:hover { color: var(--text); border-color: var(--btn-hover-border); }
 .btn-reset { background: rgba(255,215,0,0.07); color: var(--gold); border: 1px solid rgba(255,215,0,0.2); }
 .btn-reset:hover { background: var(--gold); color: #000; }
 
@@ -153,7 +196,7 @@ tr:hover td { background: rgba(255,255,255,0.015); }
 
 /* MODAL */
 .modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  position: fixed; inset: 0; background: var(--overlay);
   display: flex; align-items: center; justify-content: center;
   z-index: 500; backdrop-filter: blur(4px);
   opacity: 0; pointer-events: none; transition: opacity 0.2s;
@@ -228,7 +271,13 @@ tr:hover td { background: rgba(255,255,255,0.015); }
     <div class="admin-badge">★ Admin</div>
     <div class="header-title">Painel de Administração</div>
   </div>
-  <button class="btn-logout" onclick="logout()">Sair</button>
+  <div class="header-right">
+    <div class="theme-switch">
+      <button type="button" class="theme-btn" id="theme-light" onclick="setTheme('light')">Claro</button>
+      <button type="button" class="theme-btn" id="theme-dark" onclick="setTheme('dark')">Escuro</button>
+    </div>
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
 </header>
 
 <div class="layout">
@@ -326,10 +375,34 @@ const SUPABASE_KEY = 'sb_publishable_lfP31zfuXGO1H_4s9fLZtA_64UYcm8t';
 // ══════════════════════════════════════════
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const THEME_KEY = 'zeroapp-theme';
 let allUsers = [];
 let currentView = 'pending';
 let modalUserId = null;
 let modalUserFinData = [];
+
+initTheme();
+
+function initTheme() {
+  let theme = 'dark';
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light' || saved === 'dark') theme = saved;
+    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) theme = 'light';
+  } catch (_) {}
+  applyTheme(theme);
+}
+
+function setTheme(theme) {
+  applyTheme(theme);
+  try { localStorage.setItem(THEME_KEY, theme); } catch (_) {}
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-light')?.classList.toggle('active', theme === 'light');
+  document.getElementById('theme-dark')?.classList.toggle('active', theme === 'dark');
+}
 
 // ── AUTH GUARD ──
 (async () => {

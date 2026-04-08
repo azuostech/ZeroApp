@@ -18,6 +18,31 @@
   --muted: #555;
   --dim: #888;
   --red: #FF4444;
+  --theme-pill: #141414;
+  --theme-pill-border: #2a2a2a;
+  --theme-pill-btn: transparent;
+  --theme-pill-active-bg: #00C853;
+  --theme-pill-active-text: #04110a;
+  --theme-pill-text: #b2c7ba;
+}
+:root[data-theme="light"] {
+  --bg: #eef4f0;
+  --bg2: #ffffff;
+  --bg3: #e6eee8;
+  --border: #cddad1;
+  --green: #00a54a;
+  --green-dim: rgba(0,165,74,0.12);
+  --green-glow: rgba(0,165,74,0.16);
+  --text: #16261d;
+  --muted: #637a6f;
+  --dim: #41564c;
+  --red: #d53f3f;
+  --theme-pill: #f6faf7;
+  --theme-pill-border: #c6d6cb;
+  --theme-pill-btn: transparent;
+  --theme-pill-active-bg: #00a54a;
+  --theme-pill-active-text: #ffffff;
+  --theme-pill-text: #385146;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -70,6 +95,35 @@ body::before {
   max-width: 420px;
   padding: 20px;
   animation: fadeUp 0.5s ease both;
+}
+.theme-switch-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+.theme-switch {
+  display: inline-flex;
+  background: var(--theme-pill);
+  border: 1px solid var(--theme-pill-border);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 3px;
+}
+.theme-btn {
+  border: none;
+  background: var(--theme-pill-btn);
+  color: var(--theme-pill-text);
+  border-radius: 999px;
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.theme-btn.active {
+  background: var(--theme-pill-active-bg);
+  color: var(--theme-pill-active-text);
 }
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
@@ -256,6 +310,12 @@ input::placeholder { color: var(--muted); }
 <div class="bg-glow"></div>
 
 <div class="card">
+  <div class="theme-switch-wrap">
+    <div class="theme-switch">
+      <button type="button" class="theme-btn" id="theme-light" onclick="setTheme('light')">Claro</button>
+      <button type="button" class="theme-btn" id="theme-dark" onclick="setTheme('dark')">Escuro</button>
+    </div>
+  </div>
   <div class="brand">
     <div class="brand-mark">💚</div>
     <div class="brand-name">Jackson Souza</div>
@@ -329,6 +389,30 @@ const SUPABASE_KEY = 'sb_publishable_lfP31zfuXGO1H_4s9fLZtA_64UYcm8t';
 // ══════════════════════════════════════════
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const THEME_KEY = 'zeroapp-theme';
+
+initTheme();
+
+function initTheme() {
+  let theme = 'dark';
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light' || saved === 'dark') theme = saved;
+    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) theme = 'light';
+  } catch (_) {}
+  applyTheme(theme);
+}
+
+function setTheme(theme) {
+  applyTheme(theme);
+  try { localStorage.setItem(THEME_KEY, theme); } catch (_) {}
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-light')?.classList.toggle('active', theme === 'light');
+  document.getElementById('theme-dark')?.classList.toggle('active', theme === 'dark');
+}
 
 // Checar sessão existente
 (async () => {

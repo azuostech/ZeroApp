@@ -10,6 +10,21 @@
   --bg: #0a0a0a; --bg2: #141414; --bg3: #1c1c1c; --bg4: #222; --border: #2a2a2a; --border2: #242424;
   --green: #00C853; --green-dim: rgba(0,200,83,0.08); --green-glow: rgba(0,200,83,0.25);
   --red: #FF4444; --gold: #FFD700; --text: #f0f0f0; --muted: #555; --dim: #888;
+  --line-soft: rgba(255,255,255,0.025); --line-softer: rgba(255,255,255,0.02);
+  --hover-soft: rgba(255,255,255,0.018); --hover-softer: rgba(255,255,255,0.012);
+  --btn-outline-hover-border: #444;
+  --theme-pill: #171717; --theme-pill-border: #2a2a2a; --theme-pill-text: #b6cdbf;
+  --theme-pill-active-bg: #00C853; --theme-pill-active-text: #05110a;
+}
+:root[data-theme="light"] {
+  --bg: #edf4ef; --bg2: #ffffff; --bg3: #e8f0ea; --bg4: #dfe8e1; --border: #cad8cf; --border2: #d7e2da;
+  --green: #00a54a; --green-dim: rgba(0,165,74,0.12); --green-glow: rgba(0,165,74,0.2);
+  --red: #d74141; --gold: #b79100; --text: #16261d; --muted: #5c7467; --dim: #3d5348;
+  --line-soft: rgba(22,38,29,0.08); --line-softer: rgba(22,38,29,0.06);
+  --hover-soft: rgba(22,38,29,0.06); --hover-softer: rgba(22,38,29,0.04);
+  --btn-outline-hover-border: #8ba496;
+  --theme-pill: #f6faf7; --theme-pill-border: #c4d5ca; --theme-pill-text: #385146;
+  --theme-pill-active-bg: #00a54a; --theme-pill-active-text: #ffffff;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-serif; min-height: 100vh; }
@@ -22,12 +37,27 @@ body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-seri
 .brand-name { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--green); }
 .brand-sub { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
 .header-right { display: flex; align-items: center; gap: 12px; }
+.theme-switch { display: inline-flex; background: var(--theme-pill); border: 1px solid var(--theme-pill-border); border-radius: 999px; padding: 3px; gap: 3px; }
+.theme-btn { border: none; background: transparent; color: var(--theme-pill-text); border-radius: 999px; font-family: 'Sora', sans-serif; font-size: 10px; font-weight: 600; padding: 5px 10px; cursor: pointer; transition: all 0.15s; }
+.theme-btn.active { background: var(--theme-pill-active-bg); color: var(--theme-pill-active-text); }
 .user-name { font-size: 12px; color: var(--dim); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .header-month { display: flex; gap: 8px; }
 .month-select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); font-family: 'Space Mono', monospace; font-size: 12px; padding: 6px 10px; border-radius: 8px; cursor: pointer; outline: none; }
 .month-select:focus { border-color: var(--green); }
 .btn-logout { background: none; border: 1px solid var(--border); color: var(--dim); border-radius: 8px; font-size: 11px; padding: 6px 12px; cursor: pointer; font-family: 'Sora', sans-serif; transition: all 0.15s; }
 .btn-logout:hover { border-color: var(--red); color: var(--red); }
+@media (max-width: 880px) {
+  .header { padding: 0 10px; }
+  .header-right { gap: 8px; }
+  .user-name { display: none; }
+  .month-select { font-size: 11px; padding: 6px 8px; }
+  .theme-btn { padding: 4px 8px; }
+}
+@media (max-width: 620px) {
+  .save-indicator { display: none; }
+  .brand-sub { display: none; }
+  .btn-logout { padding: 6px 9px; }
+}
 
 /* SAVING INDICATOR */
 .save-indicator { font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
@@ -62,7 +92,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-seri
 .btn-primary { background: var(--green); color: #000; }
 .btn-primary:hover { background: #00e060; }
 .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--dim); }
-.btn-outline:hover { border-color: #444; color: var(--text); }
+.btn-outline:hover { border-color: var(--btn-outline-hover-border); color: var(--text); }
 
 /* BLOCO */
 .bloco { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 12px; overflow: hidden; animation: slideIn 0.3s ease both; }
@@ -82,7 +112,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-seri
 .bloco.open .bloco-body { display:block; }
 
 /* CAT */
-.cat-row { display:flex; align-items:center; gap:10px; padding:11px 20px; border-bottom:1px solid rgba(255,255,255,0.025); transition:background 0.1s; }
+.cat-row { display:flex; align-items:center; gap:10px; padding:11px 20px; border-bottom:1px solid var(--line-soft); transition:background 0.1s; }
 .cat-row:hover { background:var(--bg3); }
 .cat-row:last-of-type { border-bottom:none; }
 .cat-nome { flex:1; font-size:13px; color:var(--dim); }
@@ -102,7 +132,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-seri
 .grupo { border-bottom:1px solid var(--border2); }
 .grupo:last-child { border-bottom:none; }
 .grupo-header { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; cursor:pointer; user-select:none; transition:background 0.1s; }
-.grupo-header:hover { background:rgba(255,255,255,0.018); }
+.grupo-header:hover { background:var(--hover-soft); }
 .grupo-left { display:flex; align-items:center; gap:10px; }
 .grupo-arrow { font-size:10px; color:var(--muted); transition:transform 0.2s; flex-shrink:0; }
 .grupo.gopen .grupo-arrow { transform:rotate(90deg); }
@@ -113,8 +143,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-seri
 .grupo-remove-btn:hover { color:var(--red); }
 .grupo-body { display:none; }
 .grupo.gopen .grupo-body { display:block; }
-.subcat-row { display:flex; align-items:center; gap:10px; padding:9px 20px 9px 46px; border-bottom:1px solid rgba(255,255,255,0.02); transition:background 0.1s; }
-.subcat-row:hover { background:rgba(255,255,255,0.012); }
+.subcat-row { display:flex; align-items:center; gap:10px; padding:9px 20px 9px 46px; border-bottom:1px solid var(--line-softer); transition:background 0.1s; }
+.subcat-row:hover { background:var(--hover-softer); }
 .subcat-row:last-of-type { border-bottom:none; }
 .subcat-nome { flex:1; font-size:12px; color:var(--muted); }
 .subcat-input { background:var(--bg4); border:1px solid var(--border); border-radius:7px; color:var(--text); font-family:'Space Mono',monospace; font-size:12px; padding:6px 10px; width:130px; text-align:right; outline:none; transition:border-color 0.15s; }
@@ -190,6 +220,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Sora', sans-seri
         <option value="2024">2024</option><option value="2025">2025</option>
         <option value="2026" selected>2026</option>
       </select>
+    </div>
+    <div class="theme-switch">
+      <button type="button" class="theme-btn" id="theme-light" onclick="setTheme('light')">Claro</button>
+      <button type="button" class="theme-btn" id="theme-dark" onclick="setTheme('dark')">Escuro</button>
     </div>
     <button class="btn-logout" onclick="logout()">Sair</button>
   </div>
@@ -287,6 +321,30 @@ const SUPABASE_KEY = 'sb_publishable_lfP31zfuXGO1H_4s9fLZtA_64UYcm8t';
 // ══════════════════════════════════════════
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const THEME_KEY = 'zeroapp-theme';
+
+initTheme();
+
+function initTheme() {
+  let theme = 'dark';
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light' || saved === 'dark') theme = saved;
+    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) theme = 'light';
+  } catch (_) {}
+  applyTheme(theme);
+}
+
+function setTheme(theme) {
+  applyTheme(theme);
+  try { localStorage.setItem(THEME_KEY, theme); } catch (_) {}
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-light')?.classList.toggle('active', theme === 'light');
+  document.getElementById('theme-dark')?.classList.toggle('active', theme === 'dark');
+}
 
 const DEFAULTS = {
   receitas:[{nome:'Salário 1',valor:''},{nome:'Salário 2',valor:''},{nome:'Aluguel',valor:''},{nome:'Aposentadoria',valor:''}],
