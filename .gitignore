@@ -1,4 +1,5 @@
 node_modules
+.next
 .env
 .env.local
 *.log
@@ -8,3 +9,5 @@ coverage
 .DS_Store
 apps/api/prisma/migrations
 apps/web/dev-dist
+.vercel
+.env*.local

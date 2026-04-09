@@ -1,0 +1,102 @@
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse } from 'next/server';
+
+const ROOT_PATH = '/';
+
+function hasSupabaseEnv() {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+}
+
+function redirect(request, path) {
+  return NextResponse.redirect(new URL(path, request.url));
+}
+
+function jsonError(message, status) {
+  return NextResponse.json({ error: message }, { status });
+}
+
+export async function middleware(request) {
+  const pathname = request.nextUrl.pathname;
+  const isApi = pathname.startsWith('/api/');
+  const isProfileApi = pathname.startsWith('/api/profile');
+  const isFinanceApi = pathname.startsWith('/api/finance');
+  const isAdminApi = pathname.startsWith('/api/admin');
+  const isAuthApi = pathname.startsWith('/api/auth');
+
+  const isAppArea = pathname.startsWith('/app');
+  const isAdminArea = pathname.startsWith('/admin');
+  const protectedPage = isAppArea || isAdminArea;
+  const protectedApi = isFinanceApi || isAdminApi;
+
+  if (!hasSupabaseEnv()) {
+    return NextResponse.next({ request });
+  }
+
+  let response = NextResponse.next({ request });
+
+  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
+      }
+    }
+  });
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    if (protectedPage) return redirect(request, ROOT_PATH);
+    if (isProfileApi) return jsonError('unauthorized', 401);
+    if (protectedApi && !isAuthApi) return jsonError('unauthorized', 401);
+    return response;
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role,status')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!profile) {
+    if (protectedPage) return redirect(request, ROOT_PATH);
+    if (isProfileApi) return jsonError('forbidden', 403);
+    if (protectedApi) return jsonError('forbidden', 403);
+    return response;
+  }
+
+  if (pathname === ROOT_PATH && profile.status === 'active') {
+    return redirect(request, profile.role === 'admin' ? '/admin' : '/app');
+  }
+
+  if ((protectedPage || protectedApi) && profile.status !== 'active') {
+    if (isApi) return jsonError('inactive_account', 403);
+    return redirect(request, ROOT_PATH);
+  }
+
+  if (isAdminArea && profile.role !== 'admin') {
+    return redirect(request, '/app');
+  }
+
+  if (isAdminApi && profile.role !== 'admin') {
+    return jsonError('forbidden', 403);
+  }
+
+  if (isAppArea && profile.role === 'admin') {
+    return redirect(request, '/admin');
+  }
+
+  return response;
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)']
+};
