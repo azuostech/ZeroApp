@@ -1,110 +1,61 @@
-# 📦 Método Jackson Souza — Deploy no Vercel
+# ZeroApp (Next.js)
 
-## Estrutura de arquivos
+Plataforma **Finanças do Zero** migrada para arquitetura Next.js (App Router), com APIs internas e proteção de rotas no servidor.
 
-```
+## Stack atual
+
+- Next.js 15 (App Router)
+- React 19
+- Supabase (auth + banco)
+- Middleware para guard de acesso (`/app`, `/admin`, `/api/*`)
+
+## Estrutura principal
+
+```txt
 /
-├── index.html        → Login e Cadastro
-├── app.html          → App financeiro (usuários)
-├── admin.html        → Painel do administrador
-├── vercel.json       → Configuração do Vercel
-└── supabase-setup.sql → Script do banco de dados
+├── app/
+│   ├── page.js                    # login/cadastro
+│   ├── app/page.js                # área do usuário
+│   ├── admin/page.js              # painel admin
+│   └── api/...                    # camada BFF (server)
+├── src/
+│   ├── lib/supabase/              # clients browser/server/service
+│   └── modules/                   # auth, finance, admin, profile
+├── middleware.js                  # proteção de rotas
+├── supabase-setup.sql             # setup banco
+└── package.json
 ```
 
----
+## Variáveis de ambiente
 
-## 🚀 Como fazer o deploy
-
-### Opção A — Via GitHub (recomendado)
-
-1. Crie um repositório no GitHub (pode ser privado)
-2. Faça upload dos 4 arquivos: `index.html`, `app.html`, `admin.html`, `vercel.json`
-3. Acesse [vercel.com](https://vercel.com) → **Add New Project**
-4. Conecte o repositório GitHub
-5. Clique em **Deploy** — pronto
-
-Toda vez que você atualizar um arquivo no GitHub, o Vercel publica automaticamente.
-
----
-
-### Opção B — Via Vercel CLI (terminal)
+Crie `.env.local` (ou use `vercel env pull`) com:
 
 ```bash
-npm install -g vercel
-vercel login
-vercel --prod
+NEXT_PUBLIC_SUPABASE_URL=https://SEU_PROJETO.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=SUA_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY=SUA_SERVICE_ROLE_KEY
 ```
 
----
+## Rodar local
 
-### Opção C — Drag & Drop (mais simples)
-
-1. Acesse [vercel.com/new](https://vercel.com/new)
-2. Arraste a pasta com os arquivos
-3. Deploy feito
-
----
-
-## ⚙️ Configurar as variáveis
-
-Nos 3 arquivos HTML, substitua no topo do `<script>`:
-
-```js
-const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
-const SUPABASE_KEY = 'SUA_ANON_KEY';
+```bash
+npm install
+npm run dev
 ```
 
-Você encontra esses valores em:
-**Supabase → seu projeto → Settings → API**
+## Build de produção
 
----
-
-## 🗄️ Configurar o Supabase
-
-1. Acesse [supabase.com](https://supabase.com) → seu projeto
-2. Vá em **SQL Editor**
-3. Cole o conteúdo do arquivo `supabase-setup.sql` e clique em **Run**
-
----
-
-## 👑 Criar sua conta de administrador
-
-1. Acesse seu app no Vercel e crie uma conta normalmente
-2. No Supabase → SQL Editor, execute:
-
-```sql
-UPDATE profiles
-SET role = 'admin', status = 'active'
-WHERE email = 'seu@email.com';
+```bash
+npm run build
+npm run start
 ```
 
----
+## Deploy (Vercel)
 
-## 🌐 URLs após o deploy
+- O deploy via GitHub funciona automaticamente (sem `vercel.json` legado).
+- Configure as variáveis no projeto da Vercel (Preview/Production).
 
-| Rota | Arquivo |
-|------|---------|
-| `seuapp.vercel.app/` | index.html — Login |
-| `seuapp.vercel.app/app` | app.html — App financeiro |
-| `seuapp.vercel.app/admin` | admin.html — Painel admin |
+## Observações
 
----
-
-## 🔒 Segurança no Supabase
-
-Vá em **Supabase → Authentication → URL Configuration** e adicione:
-
-- **Site URL:** `https://seuapp.vercel.app`
-- **Redirect URLs:** `https://seuapp.vercel.app/index.html`
-
-Isso garante que os e-mails de confirmação e redefinição de senha redirecionem corretamente.
-
----
-
-## ✅ Checklist final
-
-- [ ] SQL executado no Supabase
-- [ ] URL e Key do Supabase nos 3 HTMLs
-- [ ] Arquivos no Vercel (GitHub ou drag & drop)
-- [ ] URL do Supabase configurada (Authentication → URL Configuration)
-- [ ] Conta de admin criada e atualizada via SQL
+- Arquivos legados estáticos (`index.html`, `app.html`, `admin.html`) foram removidos.
+- A replicação de estrutura entre meses (adicionar/remover campos) está disponível no app do usuário.
