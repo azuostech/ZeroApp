@@ -14,6 +14,12 @@ function cleanRecoveryUrl() {
   window.history.replaceState({}, '', '/auth/reset-password');
 }
 
+function redirectToAuthCallbackWithNext() {
+  const params = new URLSearchParams(window.location.search);
+  params.set('next', '/auth/reset-password');
+  window.location.replace(`/auth/callback?${params.toString()}`);
+}
+
 function getVerifyRedirectUrl() {
   const url = new URL('/auth/reset-password', window.location.origin);
   url.searchParams.set('from_verify', '1');
@@ -33,6 +39,9 @@ function redirectThroughSupabaseVerify({ token, type }) {
 }
 
 function friendlyError(message = '') {
+  if (message.includes('PKCE code verifier not found in storage')) {
+    return 'Não foi possível validar o link neste navegador. Solicite um novo link e abra no mesmo navegador onde pediu a recuperação.';
+  }
   if (message.includes('Auth session missing')) return 'Sessão de recuperação inválida. Solicite um novo link.';
   if (message.includes('token') && message.includes('expired')) return 'Link de recuperação expirado. Solicite um novo link.';
   if (message.includes('invalid')) return 'Link de recuperação inválido. Solicite um novo link.';
@@ -74,9 +83,8 @@ export default function ResetPasswordPage() {
         }
 
         if (code) {
-          const { error: codeError } = await sb.auth.exchangeCodeForSession(code);
-          if (codeError) throw codeError;
-          cleanRecoveryUrl();
+          redirectToAuthCallbackWithNext();
+          return;
         } else if (tokenHash && queryType) {
           const { error: otpError } = await sb.auth.verifyOtp({ token_hash: tokenHash, type: queryType });
           if (otpError) throw otpError;

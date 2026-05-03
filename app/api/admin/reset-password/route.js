@@ -22,7 +22,7 @@ export async function POST(request) {
     await triggerPasswordReset({
       supabase,
       email,
-      redirectTo: `${new URL(request.url).origin}/auth/reset-password`
+      redirectTo: `${new URL(request.url).origin}/auth/callback?next=/auth/reset-password`
     });
     return NextResponse.json({ ok: true });
   } catch (error) {

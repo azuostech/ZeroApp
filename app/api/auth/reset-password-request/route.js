@@ -28,7 +28,8 @@ export async function POST(request) {
   }
 
   const supabase = await createServerSupabase();
-  const redirectTo = new URL('/auth/reset-password', getSiteOrigin(request.url)).toString();
+  const origin = getSiteOrigin(request.url);
+  const redirectTo = new URL('/auth/callback?next=/auth/reset-password', origin).toString();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
   if (error) {
