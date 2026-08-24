@@ -76,4 +76,34 @@ describe('autenticação do webhook Kiwify IRC', () => {
     await mocks.scheduled[0]();
     expect(mocks.provisionIrcPurchase).toHaveBeenCalledWith({ signature, order });
   });
+
+  it('valida a assinatura na query string quando o pedido e enviado diretamente no corpo', async () => {
+    const token = 'segredo-do-webhook';
+    const order = {
+      order_id: 'order-direto-1',
+      order_status: 'paid',
+      webhook_event_type: 'order_approved',
+      Product: { product_id: 'produto-1' },
+      Customer: { email: 'compradora@example.com' },
+      checkout_link: 'ukTsTso'
+    };
+    const signature = crypto.createHmac('sha1', token).update(JSON.stringify(order)).digest('hex');
+    process.env.KIWIFY_IRC_WEBHOOK_TOKEN = token;
+    mocks.provisionIrcPurchase.mockResolvedValue({ ok: true, user_id: 'user-1' });
+
+    const response = await POST(new Request(
+      `https://www.zeroapp.tech/api/webhooks/kiwify/irc?signature=${signature}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      }
+    ));
+
+    expect(response.status).toBe(200);
+    await expect(response.text()).resolves.toBe('OK');
+    expect(mocks.provisionIrcPurchase).not.toHaveBeenCalled();
+    await mocks.scheduled[0]();
+    expect(mocks.provisionIrcPurchase).toHaveBeenCalledWith(order);
+  });
 });

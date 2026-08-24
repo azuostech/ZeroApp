@@ -21,8 +21,9 @@ POST https://www.zeroapp.tech/api/webhooks/kiwify/irc
 ```
 
 Use o mesmo segredo em `KIWIFY_IRC_WEBHOOK_TOKEN` e configure compra aprovada, reembolso,
-chargeback e cancelamento. A Kiwify envia no campo `signature` um HMAC-SHA1 de
-`JSON.stringify(order)` calculado com esse segredo; o endpoint valida o hash sem expor o token.
+chargeback e cancelamento. A Kiwify envia em `signature`, no corpo ou na query string, um HMAC-SHA1
+de `JSON.stringify(order)` calculado com esse segredo. O pedido pode ser enviado diretamente no
+corpo ou dentro de `{ order }`; o endpoint valida os dois formatos sem expor o token.
 Também aceita o header `x-kiwify-token` para integrações compatíveis. O checkout é validado por
 `KIWIFY_IRC_CHECKOUT_LINKS` porque ofertas diferentes podem compartilhar o mesmo produto na Kiwify.
 Use a URL com `www`: o domínio sem `www` responde com redirecionamento HTTP 307, que não deve ficar

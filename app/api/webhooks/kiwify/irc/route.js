@@ -30,8 +30,11 @@ function requestSignature(request, body) {
 }
 
 function calculatedSignature(body, token) {
-  if (!body?.order || typeof body.order !== 'object' || Array.isArray(body.order)) return '';
-  return crypto.createHmac('sha1', token).update(JSON.stringify(body.order)).digest('hex');
+  const order = body?.order && typeof body.order === 'object' && !Array.isArray(body.order)
+    ? body.order
+    : body;
+  if (!order || typeof order !== 'object' || Array.isArray(order)) return '';
+  return crypto.createHmac('sha1', token).update(JSON.stringify(order)).digest('hex');
 }
 
 function configuredTokens() {
