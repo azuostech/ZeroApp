@@ -890,11 +890,17 @@ export default function AdminPage() {
         .header {
           background: var(--bg2);
           border-bottom: 1px solid var(--border);
-          padding: 0 28px;
+          /*
+           * O app usa viewport-fit=cover. Em iPhones instalados como PWA a
+           * barra de status passa a ocupar a mesma viewport; por isso o topo
+           * precisa incluir a safe area em vez de posicionar os controles
+           * abaixo dela apenas visualmente.
+           */
+          padding: env(safe-area-inset-top, 0px) 28px 0;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          height: 60px;
+          height: calc(60px + env(safe-area-inset-top, 0px));
           position: sticky;
           top: 0;
           z-index: 100;
@@ -948,7 +954,8 @@ export default function AdminPage() {
 
         @media (max-width: 760px) {
           .header {
-            padding: 0 12px;
+            padding-right: max(12px, env(safe-area-inset-right, 0px));
+            padding-left: max(12px, env(safe-area-inset-left, 0px));
           }
           .header-title {
             font-size: 14px;
@@ -962,6 +969,7 @@ export default function AdminPage() {
         .layout {
           display: flex;
           min-height: calc(100vh - 60px);
+          min-height: calc(100dvh - 60px - env(safe-area-inset-top, 0px));
         }
 
         .sidebar {
