@@ -244,7 +244,7 @@ function addPdfTitle(doc, title, subtitle) {
   doc.fillColor('#5D6B62').font('Helvetica').fontSize(9).text(subtitle);
 }
 
-export function buildAnnualSummaryPdf({ summary, clientName }) {
+export function buildAnnualSummaryPdf({ summary, clientName, expandedBlockKeys = undefined }) {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margins: { top: 30, right: 30, bottom: 38, left: 30 }, bufferPages: true, info: { Title: `Resumo Financeiro Anual ${summary.year}`, Author: 'Finanças do Zero', Subject: clientName || 'Resumo anual' } });
     const chunks = [];
@@ -270,7 +270,11 @@ export function buildAnnualSummaryPdf({ summary, clientName }) {
     drawPdfTable(doc, { rows: summaryRows, columns, startY: 165 });
     doc.fillColor('#65736A').font('Helvetica').fontSize(7.5).text('Percentuais calculados sobre a receita realizada do periodo.', 30, doc.y + 15);
 
-    summary.blocks.forEach((block) => {
+    const visibleDetails = expandedBlockKeys === undefined
+      ? summary.blocks
+      : summary.blocks.filter((block) => expandedBlockKeys.includes(block.key));
+
+    visibleDetails.forEach((block) => {
       const detailRows = block.entries.length
         ? block.entries.map((entry) => ({ cells: [{ text: entry.groupLabel ? `${entry.groupLabel} / ${entry.label}` : entry.label, bold: true }, ...summary.months.map((month) => ({ text: tableAmount(entry.monthly?.[month]) })), { text: money(entry.total), bold: true }, { text: percentage(entry.revenuePercentage) }] }))
         : [{ cells: [{ text: 'Nenhum lancamento realizado neste ano.' }, ...summary.months.map(() => ({ text: '-' })), { text: '-' }, { text: '0%' }] }];

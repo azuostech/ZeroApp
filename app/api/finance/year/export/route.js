@@ -7,6 +7,15 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 const FORMATS = new Set(['xlsx', 'pdf']);
+const ANNUAL_BLOCK_KEYS = new Set(['receitas', 'pagar-primeiro', 'doar', 'contas', 'investimentos', 'desfrute']);
+
+function expandedBlockKeys(value) {
+  if (value === null) return undefined;
+  return String(value || '')
+    .split(',')
+    .map((key) => key.trim())
+    .filter((key) => ANNUAL_BLOCK_KEYS.has(key));
+}
 
 function safeFilenamePart(value) {
   return String(value || 'cliente')
@@ -22,6 +31,7 @@ export async function GET(request) {
   const year = request.nextUrl.searchParams.get('year');
   const requestedUserId = request.nextUrl.searchParams.get('user_id');
   const format = String(request.nextUrl.searchParams.get('format') || '').toLowerCase();
+  const expandedBlocks = expandedBlockKeys(request.nextUrl.searchParams.get('expanded_blocks'));
   if (!FORMATS.has(format)) return NextResponse.json({ error: 'invalid_format' }, { status: 400 });
 
   try {
@@ -30,7 +40,7 @@ export async function GET(request) {
 
     const clientName = loaded.context.targetProfile?.full_name || loaded.context.targetProfile?.email || 'Cliente';
     const buffer = format === 'pdf'
-      ? await buildAnnualSummaryPdf({ summary: loaded.summary, clientName })
+      ? await buildAnnualSummaryPdf({ summary: loaded.summary, clientName, expandedBlockKeys: expandedBlocks })
       : buildAnnualSummaryXlsx({ summary: loaded.summary, clientName });
     const filename = `resumo-financeiro-${safeFilenamePart(clientName)}-${year}.${format}`;
 

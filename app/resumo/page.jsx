@@ -214,6 +214,8 @@ export default function ResumoPage() {
     try {
       const params = new URLSearchParams({ year: String(year), format });
       if (queryContext.userId) params.set('user_id', queryContext.userId);
+      // O PDF reproduz os detalhes que o usuário deixou visíveis na tela.
+      if (format === 'pdf') params.set('expanded_blocks', Array.from(expandedBlocks).join(','));
       const response = await fetch(`/api/finance/year/export?${params.toString()}`, { cache: 'no-store' });
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
