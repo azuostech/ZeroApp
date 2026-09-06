@@ -187,15 +187,22 @@ export default function AppHeader({ initialProfile = null }) {
 
       <style jsx>{`
         .app-header {
+          --app-safe-top: env(safe-area-inset-top, 0px);
           position: sticky;
           top: 0;
           z-index: 140;
-          padding-top: env(safe-area-inset-top, 0px);
+          padding-top: var(--app-safe-top);
           background: var(--bg-header);
           border-bottom: 1px solid rgba(255, 255, 255, 0.35);
           box-shadow: var(--shadow-green);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
+        }
+
+        @media (display-mode: standalone) {
+          .app-header {
+            --app-safe-top: max(env(safe-area-inset-top, 0px), 24px);
+          }
         }
 
         .header-content {
