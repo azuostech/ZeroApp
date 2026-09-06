@@ -54,7 +54,7 @@ const PROFILE_MENU_ITEMS = [
   {
     icon: '📅',
     label: 'Resumo Mensal',
-    href: '/resumo',
+    href: '/resumo-mensal',
     description: 'Previsto x realizado por bloco'
   }
 ];
@@ -1548,7 +1548,8 @@ export default function FinanceAppPage({
     };
 
     const limparMes = async () => {
-      if (!window.confirm('Zerar todos os valores deste mês?')) return;
+      if (!window.confirm('Limpar todos os valores previstos e realizados deste mês? Esta ação não pode ser desfeita.')) return;
+      if (!window.confirm('Confirma a limpeza definitiva? Você precisará lançar os valores novamente para recuperá-los.')) return;
       SIMPLE_BLOCK_KEYS.forEach((bloco) =>
         (dados[bloco] || []).forEach((cat) => {
           const item = ensureItemShape(cat);
@@ -2037,11 +2038,18 @@ export default function FinanceAppPage({
         </div>
 
         <div className="actions-bar">
-          <button className="btn btn-primary" onClick={() => window.limparMes?.()}>
-            ↺ Limpar mês
-          </button>
-          <button className="btn btn-outline" onClick={() => window.exportarTexto?.()}>
-            ↓ Exportar resumo
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              const month = document.getElementById('mesSelect')?.value || '';
+              const year = document.getElementById('anoSelect')?.value || '';
+              const params = new URLSearchParams({ month, year });
+              if (encodedTargetId) params.set('user_id', targetUserId);
+              window.location.href = `/resumo-mensal?${params.toString()}`;
+            }}
+          >
+            Ver resumo do mês
           </button>
           <a
             className="btn btn-outline"
@@ -2049,6 +2057,9 @@ export default function FinanceAppPage({
           >
             Ver resumo anual
           </a>
+          <button className="btn btn-quiet-danger" onClick={() => window.limparMes?.()}>
+            ↺ Limpar mês
+          </button>
         </div>
 
         <div className="carry-forward-panel" id="carry-forward-panel" hidden>
@@ -2353,16 +2364,26 @@ export default function FinanceAppPage({
         }
 
         .header {
+          --finance-safe-top: env(safe-area-inset-top, 0px);
           background: var(--bg);
           border-bottom: 1px solid var(--border);
-          padding: 0 20px;
+          padding: var(--finance-safe-top) 20px 0;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          height: 56px;
+          height: calc(56px + var(--finance-safe-top));
           position: sticky;
           top: 0;
           z-index: 200;
+        }
+
+        /* Alguns PWAs Android informam zero para safe-area-inset-top mesmo
+         * com a barra de status sobreposta. Mantemos uma faixa mínima apenas
+         * no modo instalado, sem alterar a navegação pelo navegador. */
+        @media (display-mode: standalone) {
+          .header {
+            --finance-safe-top: max(env(safe-area-inset-top, 0px), 24px);
+          }
         }
 
         .header-brand {
@@ -2558,7 +2579,8 @@ export default function FinanceAppPage({
 
         @media (max-width: 880px) {
           .header {
-            padding: 0 10px;
+            padding-right: max(10px, env(safe-area-inset-right, 0px));
+            padding-left: max(10px, env(safe-area-inset-left, 0px));
           }
           .header-right {
             gap: 8px;
@@ -2575,7 +2597,7 @@ export default function FinanceAppPage({
         @media (max-width: 620px) {
           .header {
             height: auto;
-            padding: 8px 10px;
+            padding: calc(8px + var(--finance-safe-top)) max(10px, env(safe-area-inset-right, 0px)) 8px max(10px, env(safe-area-inset-left, 0px));
             flex-wrap: wrap;
             row-gap: 8px;
           }
@@ -2972,6 +2994,21 @@ export default function FinanceAppPage({
 
         .btn-primary:hover {
           background: #00e060;
+        }
+
+        .btn-quiet-danger {
+          flex: 0 0 auto;
+          background: transparent;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          padding: 8px 12px;
+          font-size: 11px;
+        }
+
+        .btn-quiet-danger:hover {
+          border-color: rgba(220, 70, 70, 0.55);
+          color: var(--red);
+          background: rgba(220, 70, 70, 0.06);
         }
 
         .btn-outline {
@@ -4258,7 +4295,7 @@ export default function FinanceAppPage({
         @media (max-width: 560px) {
           .header {
             height: auto;
-            padding: 8px 8px;
+            padding: calc(8px + var(--finance-safe-top)) max(8px, env(safe-area-inset-right, 0px)) 8px max(8px, env(safe-area-inset-left, 0px));
           }
 
           .header-right {
