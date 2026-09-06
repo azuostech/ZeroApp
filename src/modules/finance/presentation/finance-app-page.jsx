@@ -2045,7 +2045,7 @@ export default function FinanceAppPage({
               const month = document.getElementById('mesSelect')?.value || '';
               const year = document.getElementById('anoSelect')?.value || '';
               const params = new URLSearchParams({ month, year });
-              if (encodedTargetId) params.set('user_id', targetUserId);
+              if (adminViewUserId) params.set('user_id', adminViewUserId);
               window.location.href = `/resumo-mensal?${params.toString()}`;
             }}
           >
