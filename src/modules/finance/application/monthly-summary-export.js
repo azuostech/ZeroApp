@@ -41,11 +41,17 @@ export function buildMonthlySummaryPdf({ summary, clientName, expandedBlockKeys 
     doc.fillColor('#176B32').font('Helvetica-Bold').fontSize(9).text('FINANÇAS DO ZERO', { characterSpacing: 1 });
     doc.moveDown(.7).fillColor('#17231C').fontSize(23).text('Resumo Financeiro Mensal');
     doc.fillColor('#5D6B62').font('Helvetica').fontSize(10).text(`${clientName || 'Cliente'} · ${monthName} de ${summary.year}`);
-    [['Receita prevista', summary.totals.plannedRevenue], ['Receita paga', summary.totals.paidRevenue], ['Saldo pago', summary.totals.paidBalance]].forEach(([label, value], index) => {
-      const x = left + index * 174;
-      doc.roundedRect(x, 116, 158, 58, 8).fill(index === 1 ? '#F5F7F5' : '#EAF7ED');
-      doc.fillColor('#5D6B62').font('Helvetica').fontSize(8).text(label, x + 11, 128);
-      doc.fillColor('#176B32').font('Helvetica-Bold').fontSize(14).text(money(value), x + 11, 144);
+    const cards = [
+      { label: 'Receita prevista', value: summary.totals.plannedRevenue, color: '#17231C' },
+      { label: 'Receita paga', value: summary.totals.paidRevenue, color: '#00B84D' },
+      { label: 'Saldo previsto', value: summary.totals.plannedBalance, color: summary.totals.plannedBalance < 0 ? '#D93636' : '#00B84D' },
+      { label: 'Saldo pago', value: summary.totals.paidBalance, color: summary.totals.paidBalance < 0 ? '#D93636' : '#00B84D' }
+    ];
+    cards.forEach(({ label, value, color }, index) => {
+      const x = left + index * 119;
+      doc.roundedRect(x, 116, 110, 58, 8).fillAndStroke('#FFFFFF', '#E2E8E3');
+      doc.fillColor('#5D6B62').font('Helvetica').fontSize(7.5).text(label, x + 9, 128, { width: 92 });
+      doc.fillColor(color).font('Helvetica-Bold').fontSize(11.5).text(money(value), x + 9, 144, { width: 92, lineBreak: false, ellipsis: true });
     });
 
     drawHeader();
