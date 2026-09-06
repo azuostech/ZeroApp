@@ -5,6 +5,13 @@ import { sendEmail } from '@/src/lib/email/email-service';
 
 export const runtime = 'nodejs';
 
+const MONTHLY_BLOCK_KEYS = new Set(['receitas', 'pagar-primeiro', 'doar', 'contas', 'investimentos', 'desfrute']);
+
+function expandedBlockKeys(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((key) => String(key).trim()).filter((key) => MONTHLY_BLOCK_KEYS.has(key));
+}
+
 function escapeHtml(value) {
   return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
@@ -12,13 +19,14 @@ function escapeHtml(value) {
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
   const month = String(body?.month || ''); const year = String(body?.year || ''); const requestedUserId = body?.user_id;
+  const expandedBlocks = expandedBlockKeys(body?.expanded_blocks);
   try {
     const loaded = await loadMonthlySummaryRequest({ month, year, requestedUserId });
     if (!loaded.ok) return NextResponse.json({ error: loaded.error }, { status: loaded.status });
     const recipient = String(loaded.context.targetProfile?.email || (loaded.context.impersonating ? '' : loaded.context.user?.email) || '').trim();
     if (!recipient) return NextResponse.json({ error: 'recipient_email_missing' }, { status: 409 });
     const clientName = loaded.context.targetProfile?.full_name || recipient;
-    const pdf = await buildMonthlySummaryPdf({ summary: loaded.summary, clientName });
+    const pdf = await buildMonthlySummaryPdf({ summary: loaded.summary, clientName, expandedBlockKeys: expandedBlocks });
     const subject = `Resumo financeiro de ${month}/${year} - Finanças do Zero`;
     const sent = await sendEmail({ userId: loaded.context.targetUserId, to: recipient, subject, emailType: 'monthly_financial_summary', html: `<p>Olá, ${escapeHtml(clientName)}.</p><p>Seu resumo financeiro de <strong>${month}/${year}</strong> está pronto.</p><p>O relatório em PDF segue anexado.</p>`, emailSnapshot: { month, year, ...loaded.summary.totals }, attachments: [{ filename: `resumo-financeiro-${year}-${month}.pdf`, content: pdf }] });
     if (!sent.success) return NextResponse.json({ error: sent.error || 'monthly_email_failed' }, { status: 502 });
